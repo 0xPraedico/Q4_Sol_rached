@@ -93,18 +93,18 @@ impl<'info> Take<'info> {
 
         transfer_checked(ctx, self.vault.amount, self.mint_a.decimals)?;
 
-        let accounts = CloseAccount {
+        let close_accounts = CloseAccount {
             account: self.vault.to_account_info(),
             destination: self.taker.to_account_info(),
             authority: self.escrow.to_account_info(),
         };
 
-        let ctx = CpiContext::new_with_signer(
+        let close_cpi_ctx = CpiContext::new_with_signer(
             self.token_program.to_account_info(),
-            accounts,
+            close_accounts,
             &signer_seeds,
         );
 
-        close_account(ctx)
+        close_account(close_cpi_ctx)
     }
 }
