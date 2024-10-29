@@ -82,7 +82,7 @@ pub struct Stake<'info> {
 impl<'info> Stake<'info> {
     pub fn stake(&mut self, bumps: &StakeBumps) -> Result<()> {
 
-        require!(self.user_account.amount_staked < self.config.max_stake, StakeError::MaxStakeReached);
+        require!(self.user_account.amount_staked <= self.config.max_stake, StakeError::MaxStakeReached);
 
         self.stake_account.set_inner(StakeAccount {
             owner: self.user.key(),
@@ -129,6 +129,7 @@ impl<'info> Stake<'info> {
             },
         ).invoke_signed(signer_seeds)?;
 
+        
         self.user_account.amount_staked += 1;
 
         Ok(())

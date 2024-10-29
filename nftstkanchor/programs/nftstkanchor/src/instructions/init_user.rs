@@ -18,7 +18,7 @@ pub struct Initialize<'info> {
 }
 
 impl<'info> Initialize<'info> {
-    
+    // initialize user account
     pub fn initialize_user(&mut self, bumps: &InitializeBumps) -> Result<()> {
         self.user_account.set_inner(UserAccount { 
             points: 0, 
