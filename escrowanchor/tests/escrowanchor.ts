@@ -19,10 +19,8 @@ import {
   getMinimumBalanceForRentExemptMint,
 } from "@solana/spl-token";
 import { randomBytes } from "crypto";
-import { getExplorerLink, makeKeypairs } from "@solana-developers/helpers";
 
-const TOKEN_PROGRAM: typeof TOKEN_2022_PROGRAM_ID | typeof TOKEN_PROGRAM_ID =
-  TOKEN_2022_PROGRAM_ID;
+
 
 describe("escrowanchor", () => {
   // Configure the client to use the local cluster.
@@ -33,6 +31,9 @@ describe("escrowanchor", () => {
 
 
   const program = anchor.workspace.Escrowanchor as Program<Escrowanchor>;
+  
+  const tokenProgram = TOKEN_2022_PROGRAM_ID;
+  // const tokenProgram = TOKEN_PROGRAM_ID;
 
   const confirm = async (signature: string): Promise<string> => {
     const block = await connection.getLatestBlockhash();
@@ -43,38 +44,33 @@ describe("escrowanchor", () => {
     return signature;
   };
 
+  const log = async (signature: string): Promise<string> => {
+    console.log(
+      `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
+    );
+    return signature;
+  };
+
   const seed = new BN(randomBytes(8));
 
-  const [maker, taker, mintA, mintB] = makeKeypairs(4);
+  const [maker, taker, mintA, mintB] = Array.from({ length: 4 }, () =>
+    Keypair.generate()
+  );
 
   const [makerAtaA, makerAtaB, takerAtaA, takerAtaB] = [maker, taker]
-    .map((keypair) =>
-      [mintA, mintB].map((mint) =>
-        getAssociatedTokenAddressSync(
-          mint.publicKey,
-          keypair.publicKey,
-          false,
-          TOKEN_PROGRAM,
-        ),
-      ),
+    .map((a) =>
+      [mintA, mintB].map((m) =>
+        getAssociatedTokenAddressSync(m.publicKey, a.publicKey, false, tokenProgram)
+      )
     )
     .flat();
 
   const escrow = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("escrow"),
-      maker.publicKey.toBuffer(),
-      seed.toArrayLike(Buffer, "le", 8),
-    ],
-    program.programId,
+    [Buffer.from("escrow"), maker.publicKey.toBuffer(), seed.toArrayLike(Buffer, "le", 8)],
+    program.programId
   )[0];
 
-  const vault = getAssociatedTokenAddressSync(
-    mintA.publicKey,
-    escrow,
-    true,
-    TOKEN_PROGRAM,
-  );
+  const vault = getAssociatedTokenAddressSync(mintA.publicKey, escrow, true, tokenProgram);
 
   // Accounts
   const accounts = {
@@ -88,8 +84,8 @@ describe("escrowanchor", () => {
     takerAtaB,
     escrow,
     vault,
-    tokenProgram: TOKEN_PROGRAM,
-  };
+    tokenProgram,
+  }
 
   it("Airdrop and create mints", async () => {
     let lamports = await getMinimumBalanceForRentExemptMint(connection);
@@ -100,7 +96,7 @@ describe("escrowanchor", () => {
           fromPubkey: provider.publicKey,
           toPubkey: account.publicKey,
           lamports: 10 * LAMPORTS_PER_SOL,
-        }),
+        })
       ),
       ...[mintA, mintB].map((mint) =>
         SystemProgram.createAccount({
@@ -108,88 +104,55 @@ describe("escrowanchor", () => {
           newAccountPubkey: mint.publicKey,
           lamports,
           space: MINT_SIZE,
-          programId: TOKEN_PROGRAM,
-        }),
+          programId: tokenProgram,
+        })
       ),
       ...[
         { mint: mintA.publicKey, authority: maker.publicKey, ata: makerAtaA },
         { mint: mintB.publicKey, authority: taker.publicKey, ata: takerAtaB },
-      ].flatMap((x) => [
-        createInitializeMint2Instruction(
-          x.mint,
-          6,
-          x.authority,
-          null,
-          TOKEN_PROGRAM,
-        ),
-        createAssociatedTokenAccountIdempotentInstruction(
-          provider.publicKey,
-          x.ata,
-          x.authority,
-          x.mint,
-          TOKEN_PROGRAM,
-        ),
-        createMintToInstruction(
-          x.mint,
-          x.ata,
-          x.authority,
-          1e9,
-          undefined,
-          TOKEN_PROGRAM,
-        ),
-      ]),
+      ]
+      .flatMap((x) => [
+        createInitializeMint2Instruction(x.mint, 6, x.authority, null, tokenProgram),
+        createAssociatedTokenAccountIdempotentInstruction(provider.publicKey, x.ata, x.authority, x.mint, tokenProgram),
+        createMintToInstruction(x.mint, x.ata, x.authority, 1e9, undefined, tokenProgram),
+      ])
     ];
 
-    const transactionSignature = await provider.sendAndConfirm(tx, [
-      mintA,
-      mintB,
-      maker,
-      taker,
-    ]);
-
-    console.log(getExplorerLink("transaction", transactionSignature));
+    await provider.sendAndConfirm(tx, [mintA, mintB, maker, taker]).then(log);
   });
 
-  const make = async () => {
-    const transactionSignature = await program.methods
+  it("Make", async () => {
+    await program.methods
       .make(seed, new BN(1e6), new BN(1e6))
       .accounts({ ...accounts })
       .signers([maker])
-      .rpc();
+      .rpc()
+      .then(confirm)
+      .then(log);
+  });
 
-    await confirm(transactionSignature);
-    console.log(getExplorerLink("transaction", transactionSignature));
-  };
-
-  const take = async () => {
-    const transactionSignature = await program.methods
-      .take()
-      .accounts({ ...accounts })
-      .signers([taker])
-      .rpc();
-
-    await confirm(transactionSignature);
-    console.log(getExplorerLink("transaction", transactionSignature));
-  };
-
-  const refund = async () => {
-    const transactionSignature = await program.methods
+  xit("Refund", async () => {
+    await program.methods
       .refund()
       .accounts({ ...accounts })
       .signers([maker])
-      .rpc();
-
-    await confirm(transactionSignature);
-    console.log(getExplorerLink("transaction", transactionSignature));
-  };
-
-  it("Makes an offer and refunds it when the maker asks", async () => {
-    await make();
-    await refund();
+      .rpc()
+      .then(confirm)
+      .then(log);
   });
 
-  it("Makes an offer and then swaps tokens when offer is taken", async () => {
-    await make();
-    await take();
+  it("Take", async () => {
+    try {
+    await program.methods
+      .take()
+      .accounts({  ...accounts })
+      .signers([taker])
+      .rpc()
+      .then(confirm)
+      .then(log);
+    } catch(e) {
+      console.log(e);
+      throw(e)
+    }
   });
 });

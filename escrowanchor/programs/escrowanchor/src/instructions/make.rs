@@ -16,6 +16,7 @@ pub struct Make<'info> {
     #[account(
         associated_token::mint = mint_a,
         associated_token::authority = maker,
+        
     )]
     pub maker_ata_a: InterfaceAccount<'info, TokenAccount>,
     #[account(
@@ -31,6 +32,7 @@ pub struct Make<'info> {
         payer = maker,
         associated_token::mint = mint_a,
         associated_token::authority = escrow,
+        
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
 
