@@ -2,12 +2,14 @@ use anchor_lang::prelude::*;
 
 declare_id!("G1KxMmExYfRtaniiiEGEJUsUJxYanTi6rsAUsv5LDUH7");
 
-mod state;
-mod instructions;
-mod errors;
+pub mod constants;
+pub mod errors;
+pub mod instructions;
+pub mod state;
 
+pub use constants::*;
 pub use instructions::*;
-
+pub use state::*;
 
 #[program]
 pub mod nftstkanchor {
@@ -25,6 +27,13 @@ pub mod nftstkanchor {
         ctx.accounts.stake(&ctx.bumps)
     }
 
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+        ctx.accounts.unstake()
+    }
+
+    pub fn claim(ctx: Context<Claim>) -> Result<()> {
+        ctx.accounts.claim()
+    }
 }
 
 
