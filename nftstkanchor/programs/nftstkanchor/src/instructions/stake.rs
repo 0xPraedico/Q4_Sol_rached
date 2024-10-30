@@ -38,7 +38,7 @@ pub struct Stake<'info> {
             metadata_program.key().as_ref(),
             mint.key().as_ref()
         ],
-        seeds::program = metadata_program.key(),
+        seeds::program = metadata_program.key(), //pda own by metadata program
         bump,
         constraint = metadata.collection.as_ref().unwrap().key.as_ref() == collection_mint.key().as_ref(),
         constraint = metadata.collection.as_ref().unwrap().verified == true,
@@ -54,7 +54,7 @@ pub struct Stake<'info> {
         seeds::program = metadata_program.key(),
         bump,
     )]
-    pub edition: Account<'info, MasterEditionAccount>,
+    pub edition: Account<'info, MasterEditionAccount>, // verify the non-fungibility of the nft
     #[account(
         seeds = [b"config".as_ref()],
         bump = config.bump,

@@ -42,7 +42,7 @@ pub struct Unstake<'info> {
     )]
     pub edition: Account<'info, MasterEditionAccount>,
     #[account(
-        seeds = [b"config".as_ref()],
+        seeds = [b"config"],
         bump = config.bump,
     )]
     pub config: Account<'info, StakeConfig>,
@@ -50,7 +50,7 @@ pub struct Unstake<'info> {
         mut,
         close = user,
         seeds = [b"stake".as_ref(), mint.key().as_ref(), config.key().as_ref()],
-        bump,
+        bump = stake_account.bump,
     )]
     pub stake_account: Account<'info, StakeAccount>,
     #[account(
