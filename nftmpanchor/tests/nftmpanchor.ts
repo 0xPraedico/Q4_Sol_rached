@@ -8,9 +8,5 @@ describe("nftmpanchor", () => {
 
   const program = anchor.workspace.Nftmpanchor as Program<Nftmpanchor>;
 
-  it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
-  });
+ 
 });
