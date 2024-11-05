@@ -76,7 +76,9 @@ impl<'info> Purchase<'info> {
 
         let cpi_ctx = CpiContext::new(self.system_program.to_account_info(), cpi_accounts);
 
-        transfer(cpi_ctx, amount)
+        transfer(cpi_ctx, amount)?;
+
+        Ok(())
     }
 
     pub fn send_nft(&mut self) -> Result<()> {

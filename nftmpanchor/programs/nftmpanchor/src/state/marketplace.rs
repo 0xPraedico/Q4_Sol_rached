@@ -7,7 +7,7 @@ pub struct Marketplace {
     pub bump: u8,
     pub treasury_bump: u8,
     pub rewards_bump: u8,
-    pub name: String, //Set this at max length of 32
+    pub name: String, //Set this at max length of 32 (32 bytes)
 }
 
 impl Space for Marketplace {
