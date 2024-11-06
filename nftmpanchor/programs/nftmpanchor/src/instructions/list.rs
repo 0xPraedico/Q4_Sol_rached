@@ -81,6 +81,8 @@ impl<'info> List<'info> {
     }
 
     pub fn deposit_nft(&mut self) -> Result<()> {
+        let cpi_program = self.token_program.to_account_info();
+
         let cpi_accounts = TransferChecked {
             from: self.maker_ata.to_account_info(),
             to: self.vault.to_account_info(),
@@ -88,7 +90,7 @@ impl<'info> List<'info> {
             mint: self.maker_mint.to_account_info(),
         };
 
-        let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         transfer_checked(cpi_ctx, 1, self.maker_mint.decimals)
     }

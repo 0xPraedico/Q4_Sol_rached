@@ -44,6 +44,8 @@ impl<'info> Delist<'info> {
         ];
         let signer_seeds = &[&seeds[..]];
 
+        let cpi_program = self.token_program.to_account_info();
+
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             to: self.maker_ata.to_account_info(),
@@ -52,7 +54,7 @@ impl<'info> Delist<'info> {
         };
 
         let cpi_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            cpi_program,
             cpi_accounts,
             signer_seeds,
         );
@@ -67,6 +69,8 @@ impl<'info> Delist<'info> {
         ];
         let signer_seeds = &[&seeds[..]];
 
+        let cpi_program = self.token_program.to_account_info();
+
         let cpi_accounts = CloseAccount {
             account: self.vault.to_account_info(),
             destination: self.maker.to_account_info(),
@@ -74,7 +78,7 @@ impl<'info> Delist<'info> {
         };
 
         let cpi_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            cpi_program,
             cpi_accounts,
             signer_seeds
         );

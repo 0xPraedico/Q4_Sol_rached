@@ -56,29 +56,41 @@ pub struct Purchase<'info> {
 
 impl<'info> Purchase<'info> {
     pub fn send_sol(&self) -> Result<()> {
-        let cpi_accounts = Transfer {
-            from: self.taker.to_account_info(),
-            to: self.maker.to_account_info(),
+        let marketplace_fee = (self.marketplace.fee as u64)
+        .checked_div(10000_u64)
+        .unwrap()
+        .checked_mul(self.listing.price)
+        .unwrap();
+
+        let cpi_program = self.system_program.to_account_info();
+
+        let cpi_account = Transfer {
+        from: self.taker.to_account_info(),
+        to: self.maker.to_account_info(),
         };
 
-        let cpi_ctx = CpiContext::new(self.system_program.to_account_info(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_account);
 
-        let amount = self.listing.price
-            .checked_mul(self.marketplace.fee as u64).unwrap()
-            .checked_div(10000).unwrap();
+        let amount = self.listing.price.checked_sub(marketplace_fee).unwrap();
 
-        transfer(cpi_ctx, self.listing.price - amount)?;
+        transfer(cpi_ctx, amount)?;
 
-        let cpi_accounts = Transfer {
+        let cpi_program = self.system_program.to_account_info();
+
+        let cpi_account = Transfer {
             from: self.taker.to_account_info(),
             to: self.treasury.to_account_info(),
         };
 
-        let cpi_ctx = CpiContext::new(self.system_program.to_account_info(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_account);
 
-        transfer(cpi_ctx, amount)?;
+        let marketplace_fee = (self.marketplace.fee as u64)
+            .checked_div(10000_u64)
+            .unwrap()
+            .checked_mul(self.listing.price)
+            .unwrap();
 
-        Ok(())
+        transfer(cpi_ctx, marketplace_fee)
     }
 
     pub fn send_nft(&mut self) -> Result<()> {
@@ -89,6 +101,9 @@ impl<'info> Purchase<'info> {
         ];
         let signer_seeds = &[&seeds[..]];
 
+        let cpi_program = self.token_program.to_account_info();
+
+
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             to: self.taker_ata.to_account_info(),
@@ -97,7 +112,7 @@ impl<'info> Purchase<'info> {
         };
 
         let cpi_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            cpi_program,
             cpi_accounts,
             signer_seeds,
         );
@@ -113,6 +128,8 @@ impl<'info> Purchase<'info> {
         ];
         let signer_seeds = &[&seeds[..]];
 
+        let cpi_program = self.token_program.to_account_info();
+
         let cpi_accounts = CloseAccount {
             account: self.vault.to_account_info(),
             destination: self.maker.to_account_info(),
@@ -120,7 +137,7 @@ impl<'info> Purchase<'info> {
         };
 
         let cpi_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            cpi_program,
             cpi_accounts,
             signer_seeds
         );
