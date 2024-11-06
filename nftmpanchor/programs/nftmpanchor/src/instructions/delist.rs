@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked, transfer_checked};
+use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked, transfer_checked, CloseAccount, close_account};
 use crate::state::{Listing, Marketplace};
 
 #[derive(Accounts)]
@@ -58,5 +58,27 @@ impl<'info> Delist<'info> {
         );
 
         transfer_checked(cpi_ctx, 1, self.maker_mint.decimals)
+    }
+    pub fn close_mint_vault(&mut self) -> Result<()> {
+        let seeds = &[
+            &self.marketplace.key().to_bytes()[..],
+            &self.maker_mint.key().to_bytes()[..],
+            &[self.listing.bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
+
+        let cpi_accounts = CloseAccount {
+            account: self.vault.to_account_info(),
+            destination: self.maker.to_account_info(),
+            authority: self.listing.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds
+        );
+
+        close_account(cpi_ctx)
     }
 }
