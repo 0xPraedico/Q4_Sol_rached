@@ -36,7 +36,7 @@ MetaMem is deployed on the **Solana Devnet**:
 MetaMem uses a **Cross-Program Invocation (CPI)** with the Raydium protocol to handle swaps within the Solana ecosystem efficiently.  
 
 ### **2. Transaction Scaling with Address Lookup Tables (ALTs)**  
-To manage the size of transactions during the tests, MetaMem leverages **versioned transactions** and **Address Lookup Tables**, enabling seamless execution of complex operations.  
+To manage the size of transactions during the tests, MetaMem leverages **versioned transactions** and **Address Lookup Tables**, enabling atomic execution of multiple instructions.  
 
 ---
 
