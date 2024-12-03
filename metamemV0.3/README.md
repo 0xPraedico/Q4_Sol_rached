@@ -3,7 +3,7 @@
 MetaMem v0.3 is a milestone version of my Capstone Project, developed during the **Turbin3 builder cohort**.  
 
 MetaMem is an **index token launchpad** built on Solana, designed to:  
-- Enable users to create custom token indexes or portfolios in just a few clicks.  
+- Enable users to create custom indexes or portfolios in just a few clicks.  
 - Track the performance of these indexes over time.  
 - Share indexes with friends, allowing them to replicate and invest easily.  
 
@@ -27,6 +27,11 @@ MetaMem is deployed on the **Solana Devnet**:
 
 ### Fee Management  
 - Fees are collected during the swap operations and routed to a designated wallet for project sustainability.  
+
+### Tests
+- Creation test : [Index of 4 underlying tokens](https://solana.fm/tx/2WdtijSmG7nQsxWcnTHuc9aBLtaj3RmuVvygcYZnpEiUTcAoCbppt3yX36rLspr9h6LJUMRDWUXYfAW3EJPv7bxD?cluster=devnet-alpha)
+- Redeem test : [Redeem the Index created](https://solana.fm/tx/54nALwJBFZbreLswaoNfWkAuQL7ocyTTycQzLdcH4ey3Vjci3MtthaUSmaJYLRt8onQry9ERznfBy5wK4BdauRc9?cluster=devnet-alpha)
+
 
 ---
 
