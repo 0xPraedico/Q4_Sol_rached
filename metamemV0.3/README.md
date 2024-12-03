@@ -19,10 +19,10 @@ MetaMem is deployed on the **Solana Devnet**:
 
 ### 1. Index Creation  
 - Users can select underlying tokens to compose an index.  
-- The program handles the required token swaps, deposits them into a vault, and mints the corresponding index token.  
+- The program handles the required token swaps, deposits them into an index vault.  
 
 ### 2. Redeem Process  
-- Burn an index token to redeem the underlying assets.  
+- Withdraw the underlying tokens
 - Reverse swaps are automatically performed to return to the original currency or token.  
 
 ### Fee Management  
