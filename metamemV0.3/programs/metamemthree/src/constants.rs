@@ -1,0 +1,1 @@
+pub const FEE_RECEIVER: &str = "Kvn6AEP9Xz3JUbYRsJiF7hYnyZxcHeJtKU4zR7m3BrF";
